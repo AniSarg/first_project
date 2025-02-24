@@ -21,10 +21,10 @@ app.get('/profile-picture', function (req, res) {
 });
 
 // use when starting application locally
-let mongoUrlLocal = "mongodb://admin:password@localhost:27017";
+let mongoUrlLocal = "mongodb://admin:pass@localhost:27017";
 
 // use when starting application as docker container
-let mongoUrlDocker = "mongodb://admin:password@mongodb";
+let mongoUrlDocker = "mongodb://admin:pass@mongodb";
 
 // pass these options to mongo client connect request to avoid DeprecationWarning for current Server Discovery and Monitoring engine
 let mongoClientOptions = { useNewUrlParser: true, useUnifiedTopology: true };
@@ -75,6 +75,6 @@ app.get('/get-profile', function (req, res) {
   });
 });
 
-app.listen(3000, function () {
+app.listen(3000, '0.0.0.0', function () {
   console.log("app listening on port 3000!");
 });

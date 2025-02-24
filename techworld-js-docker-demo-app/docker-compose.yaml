@@ -5,9 +5,12 @@ services:
     build: .
     image: anilag/web-app
     ports: 
-      - 83:3000
+      - 3000:3000
     networks:
       - mongo
+    depends_on:
+      - mongodb
+      - mongo-ui
 
   mongodb:
     image: mongo
@@ -21,6 +24,7 @@ services:
     networks:
       - mongo
 
+
   mongo-ui:
     image: mongo-express
     restart: always
@@ -30,7 +34,7 @@ services:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      - ME_CONFIG_MONGODB_URL=mongodb://admin:secret@mongodb:27017/
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:pass@mongodb:27017/
       - ME_CONFIG_BASICAUTH=false
     networks: 
       - mongo

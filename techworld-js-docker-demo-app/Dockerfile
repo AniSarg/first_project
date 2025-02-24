@@ -1,13 +1,11 @@
-FROM node:18.20.6-alpine
+FROM node:13-alpine
 
 ENV MONGO_DB_USERNAME=admin \
-    MONGO_DB_PWD=pass
-
-RUN mkdir -p /app
-
-COPY ./app /app
+    MONGO_DB_PWD=pass 
 
 WORKDIR /app
+
+COPY ./app ./
 
 RUN npm install
 
