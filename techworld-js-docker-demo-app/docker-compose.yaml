@@ -5,7 +5,7 @@ services:
     build: .
     image: anilag/web-app
     ports: 
-      - 80:3000
+      - 3000:3000
     networks:
       - mongo
     depends_on:
