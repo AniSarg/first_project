@@ -1,80 +1,89 @@
-let express = require('express');
-let path = require('path');
-let fs = require('fs');
-let MongoClient = require('mongodb').MongoClient;
-let bodyParser = require('body-parser');
-let app = express();
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const MongoClient = require('mongodb').MongoClient;
+const bodyParser = require('body-parser');
+const cors = require('cors'); // Import the CORS middleware
 
+const app = express();
+
+// Enable CORS for all domains or specify a domain
+app.use(cors({
+  origin: '*',  // Allow all origins (for development purposes)
+  methods: 'GET,POST,PUT,DELETE,OPTIONS',
+  allowedHeaders: 'Content-Type, Authorization'
+}));
+
+// Parse incoming request bodies
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
 
+// Serve index.html
 app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, "index.html"));
-  });
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
+// Serve profile picture
 app.get('/profile-picture', function (req, res) {
   let img = fs.readFileSync(path.join(__dirname, "images/profile-1.jpg"));
   res.writeHead(200, {'Content-Type': 'image/jpg' });
   res.end(img, 'binary');
 });
 
-// use when starting application locally
-let mongoUrlLocal = "mongodb://admin:pass@localhost:27017";
+// MongoDB connection URLs
+const mongoUrlLocal = "mongodb://admin:pass@localhost:27017";
+const mongoUrlDocker = "mongodb://admin:pass@mongodb";  // This assumes MongoDB is running on a Docker container
 
-// use when starting application as docker container
-let mongoUrlDocker = "mongodb://admin:pass@mongodb";
+// MongoDB connection options
+const mongoClientOptions = { useNewUrlParser: true, useUnifiedTopology: true };
+const databaseName = "user-account";  // Change to your database name
 
-// pass these options to mongo client connect request to avoid DeprecationWarning for current Server Discovery and Monitoring engine
-let mongoClientOptions = { useNewUrlParser: true, useUnifiedTopology: true };
-
-// "user-account" in demo with docker. "my-db" in demo with docker-compose
-let databaseName = "user-account";
-
+// Route to update profile
 app.post('/update-profile', function (req, res) {
-  let userObj = req.body;
+  const userObj = req.body;
 
   MongoClient.connect(mongoUrlDocker, mongoClientOptions, function (err, client) {
     if (err) throw err;
 
-    let db = client.db(databaseName);
-    userObj['userid'] = 1;
+    const db = client.db(databaseName);
+    userObj['userid'] = 1;  // Add or update the user ID
 
-    let myquery = { userid: 1 };
-    let newvalues = { $set: userObj };
+    const myquery = { userid: 1 };
+    const newvalues = { $set: userObj };
 
-    db.collection("users").updateOne(myquery, newvalues, {upsert: true}, function(err, res) {
+    db.collection("users").updateOne(myquery, newvalues, { upsert: true }, function(err, result) {
       if (err) throw err;
       client.close();
     });
-
   });
-  // Send response
-  res.send(userObj);
+
+  res.send(userObj);  // Send the user data back to the client
 });
 
+// Route to get profile
 app.get('/get-profile', function (req, res) {
   let response = {};
-  // Connect to the db
+
   MongoClient.connect(mongoUrlDocker, mongoClientOptions, function (err, client) {
     if (err) throw err;
 
-    let db = client.db(databaseName);
-
-    let myquery = { userid: 1 };
+    const db = client.db(databaseName);
+    const myquery = { userid: 1 };
 
     db.collection("users").findOne(myquery, function (err, result) {
       if (err) throw err;
       response = result;
       client.close();
 
-      // Send response
+      // Send the response (or an empty object if no data found)
       res.send(response ? response : {});
     });
   });
 });
 
+// Start the server on port 3000
 app.listen(3000, function () {
-  console.log("app listening on port 3000!");
+  console.log("App listening on port 3000!");
 });
