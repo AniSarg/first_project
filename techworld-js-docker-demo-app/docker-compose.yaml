@@ -3,7 +3,7 @@ version: '3.9'
 services:
   web-app:
     build: .
-    image: anilag/web-app
+    image: anilag/web-app:v1
     ports: 
       - 3000:3000
     networks:
