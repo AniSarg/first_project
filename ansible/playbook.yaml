@@ -1,0 +1,109 @@
+---
+- name: My first project with ansible and docker 
+  hosts: web
+  become: true
+
+  tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Installing dependences
+      apt:
+        name: apt-transport-https
+        state: present
+
+    - name: Installing dependences
+      apt:
+        name: ca-certificates
+        state: present
+
+    - name: Installing dependences
+      apt:
+        name: curl
+        state: present
+
+    - name: Installing net-tools
+      apt:
+        name: net-tools
+        state: present
+
+    - name: Installing dependences
+      apt:
+        name: software-properties-common
+        state: present
+    
+    - name: Installing nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
+        state: present
+
+    - name: install docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: install git
+      apt:
+        name: git
+        state: present
+    
+    - name: install docker-compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Deleting nginx default config file
+      file:
+        path: /etc/nginx/site-available/default
+        state: absent
+
+          #- name: Copy nginx default.conf
+          #copy:
+          #src: /home/ubuntu/site.conf
+          #dest: /etc/nginx/sites-available/default
+          # mode: '0644'
+
+          # - name: Link default.conf
+          #file:
+          #src: /etc/nginx/sites-available/default
+          #dest: /etc/nginx/sites-enabled/default
+          #state: link
+
+    - name: Restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+
+    - name: Copy script to the client servers
+      copy:
+        src: /home/ubuntu/run-script.sh
+        dest: /home/ubuntu/run-script.sh
+        mode: '0755'
+      
+    - name: Copy docker vars
+      copy: 
+        src: /home/ubuntu/.env
+        dest: /home/ubuntu/.env
+        mode: '0755'
+
+    - name: Run the script
+      shell: /home/ubuntu/run-script.sh
+      args:
+        chdir: /home/ubuntu
+
+          #- name: Get my public IP
+      #ipify_facts:
+
+        #  - debug: var=ipify_public_ip
